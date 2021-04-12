@@ -128,39 +128,6 @@ if (mockData.length === 0) {
 
   const siteFilmsMostCommentedElement = siteMainElement.querySelector('.films-list__most-commented');
   renderFilms(siteFilmsMostCommentedElement, Places.BEFOREEND, sorting(mockData, SortingTypes.BY_COMMENTING).slice(0, Variable.FILM_EXTRA_COUNT));
-
-  // render(siteBodyElement, new FilmPopupView(mockData[0]).getElement(), Places.BEFOREEND);
-
-  // const buttonClosePopupElement = document.querySelector('.film-details__close-btn');
-
-  // siteBodyElement.classList.add('hide-overflow');
-
-  // buttonClosePopupElement.addEventListener('click', (evt) => {
-  //   evt.preventDefault();
-  //   closePopup();
-  // });
-
-  // const popupEscPressHandler = (evt) => {
-  //   if (evt.key === 'Escape') {
-  //     evt.preventDefault();
-  //     closePopup();
-  //   }
-  // };
-
-  // document.addEventListener('keydown', popupEscPressHandler);
-
-  // const closePopup = () => {
-  //   removePopup();
-  //   document.removeEventListener('keydown', popupEscPressHandler);
-  // };
-
-  // const removePopup = () => {
-  //   const popup = document.querySelector('.film-details');
-  //   if (popup) {
-  //     siteBodyElement.classList.remove('hide-overflow');
-  //     popup.remove();
-  //   }
-  // };
 }
 
 const siteFooterStatisticsElement = siteBodyElement.querySelector('.footer__statistics');
