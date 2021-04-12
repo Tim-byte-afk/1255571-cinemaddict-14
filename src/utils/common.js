@@ -1,4 +1,4 @@
-import {sortingType, monthNames} from '../const';
+import {SortingTypes, MONTH_NAMES, Places} from '../const';
 
 const getRandomInt = (min, max) => {
   min = Math.ceil(min);
@@ -42,13 +42,13 @@ const arrayToString = (myArray) => {
 };
 
 const sorting = (data, activeSorting) => {
-  if (activeSorting === sortingType.BY_DEFAULT) {
+  if (activeSorting === SortingTypes.BY_DEFAULT) {
     return data.slice().sort((a, b) => (b.id - a.id));
-  } else if (activeSorting === sortingType.BY_DATE) {
+  } else if (activeSorting === SortingTypes.BY_DATE) {
     return data.slice().sort((a, b) => (new Date(b.film_info.release.date) - new Date(a.film_info.release.date)));
-  } else if (activeSorting === sortingType.BY_RAITING) {
+  } else if (activeSorting === SortingTypes.BY_RAITING) {
     return data.slice().sort((a, b) => (b.film_info.total_rating - a.film_info.total_rating));
-  } else if (activeSorting === sortingType.BY_COMMENTING) {
+  } else if (activeSorting === SortingTypes.BY_COMMENTING) {
     return data.slice().sort((a, b) => (b.comments.length - a.comments.length));
   }
 
@@ -56,11 +56,37 @@ const sorting = (data, activeSorting) => {
 };
 
 const getDateFilm = (date) => {
-  return new Date(date).getDay() + ' ' + monthNames[new Date(date).getMonth()] + ' ' + new Date(date).getFullYear();
+  return new Date(date).getDay() + ' ' + MONTH_NAMES[new Date(date).getMonth()] + ' ' + new Date(date).getFullYear();
 };
 
 const getDateComment = (date) => {
   return new Date(date).getFullYear() + '/' + new Date(date).getMonth() + '/' + new Date(date).getDay() + ' ' + new Date(date).getHours() + ':' + new Date(date).getMinutes();
 };
 
-export {shuffle, getRandomInt, getRandomDate, arrayToString, sorting, getDateFilm, getDateComment};
+const render = (container, element, place) => {
+  switch (place) {
+    case Places.AFTERBEGIN:
+      container.prepend(element);
+      break;
+    case Places.BEFOREEND:
+      container.append(element);
+      break;
+    case Places.BEFOREBEGIN:
+      container.before(element);
+      break;
+  }
+};
+
+const renderTemplate = (container, template, place) => {
+  container.insertAdjacentHTML(place, template);
+};
+
+const createElement = (template) => {
+  const newElement = document.createElement('div'); // 1
+  newElement.innerHTML = template; // 2
+
+  return newElement.firstChild; // 3
+};
+
+
+export {shuffle, getRandomInt, getRandomDate, arrayToString, sorting, getDateFilm, getDateComment, render, renderTemplate, createElement};

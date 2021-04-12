@@ -1,10 +1,11 @@
-import {countList} from '../const';
+import {Variable} from '../const';
+import {createElement} from '../utils/common';
 
-export const createFilmCardTemplate = ({film_info, comments}) => {
+const createFilmCardTemplate = ({film_info, comments}) => {
   const {id, title, total_rating, release, runtime, genre, poster, description} = film_info;
 
   const genreList = genre[0];
-  const shortDesc = description.length > countList.MAX_COUNT_CHARACTER ? description.slice(0, countList.MAX_COUNT_CHARACTER) + '...' : description ;
+  const shortDesc = description.length > Variable.MAX_COUNT_CHARACTER ? description.slice(0, Variable.MAX_COUNT_CHARACTER) + '...' : description ;
   const date = new Date(release.date).getFullYear();
 
   return (
@@ -27,3 +28,26 @@ export const createFilmCardTemplate = ({film_info, comments}) => {
     </article>`
   );
 };
+
+export default class FilmCard {
+  constructor(film) {
+    this._element = null;
+    this._film = film;
+  }
+
+  getTemplate() {
+    return createFilmCardTemplate(this._film);
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}

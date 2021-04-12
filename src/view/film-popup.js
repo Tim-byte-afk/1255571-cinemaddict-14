@@ -1,15 +1,15 @@
-import {arrayToString, getDateFilm, getDateComment} from '../utils/common';
+import {arrayToString, getDateFilm, getDateComment, createElement} from '../utils/common';
 
-export const createFilmPopupTemplate = ({film_info, comments}) => {
+const createFilmPopupTemplate = ({film_info, comments}) => {
   const {title, alternative_title, total_rating, release, runtime, genre, poster, description, age_rating, director, writers, actors} = film_info;
 
-  const writersList = arrayToString(writers);
-  const actorsList = arrayToString(actors);
+  const authors = arrayToString(writers);
+  const mummers = arrayToString(actors);
 
   const releaseDate = getDateFilm(release.date);
 
   return (
-    `<section class="film-details">
+    `<section class="film-details visually-hidden">
       <form class="film-details__inner" action="" method="get">
         <div class="film-details__top-container">
           <div class="film-details__close">
@@ -41,11 +41,11 @@ export const createFilmPopupTemplate = ({film_info, comments}) => {
                 </tr>
                 <tr class="film-details__row">
                   <td class="film-details__term">Writers</td>
-                  <td class="film-details__cell">${writersList}</td>
+                  <td class="film-details__cell">${authors}</td>
                 </tr>
                 <tr class="film-details__row">
                   <td class="film-details__term">Actors</td>
-                  <td class="film-details__cell">${actorsList}</td>
+                  <td class="film-details__cell">${mummers}</td>
                 </tr>
                 <tr class="film-details__row">
                   <td class="film-details__term">Release Date</td>
@@ -146,3 +146,26 @@ const createCommentTemplate = (comment) => {
     </li>`
   );
 };
+
+export default class FilmPopup {
+  constructor(film) {
+    this._element = null;
+    this._film = film;
+  }
+
+  getTemplate() {
+    return createFilmPopupTemplate(this._film);
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}
