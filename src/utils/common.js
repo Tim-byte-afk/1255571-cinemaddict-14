@@ -1,4 +1,4 @@
-import {SortingTypes, MONTH_NAMES, Places} from '../const';
+import {SortingTypes, MONTH_NAMES} from '../const';
 
 const getRandomInt = (min, max) => {
   min = Math.ceil(min);
@@ -63,30 +63,4 @@ const getDateComment = (date) => {
   return new Date(date).getFullYear() + '/' + new Date(date).getMonth() + '/' + new Date(date).getDay() + ' ' + new Date(date).getHours() + ':' + new Date(date).getMinutes();
 };
 
-const render = (container, element, place) => {
-  switch (place) {
-    case Places.AFTERBEGIN:
-      container.prepend(element);
-      break;
-    case Places.BEFOREEND:
-      container.append(element);
-      break;
-    case Places.BEFOREBEGIN:
-      container.before(element);
-      break;
-  }
-};
-
-const renderTemplate = (container, template, place) => {
-  container.insertAdjacentHTML(place, template);
-};
-
-const createElement = (template) => {
-  const newElement = document.createElement('div'); // 1
-  newElement.innerHTML = template; // 2
-
-  return newElement.firstChild; // 3
-};
-
-
-export {shuffle, getRandomInt, getRandomDate, arrayToString, sorting, getDateFilm, getDateComment, render, renderTemplate, createElement};
+export {shuffle, getRandomInt, getRandomDate, arrayToString, sorting, getDateFilm, getDateComment};

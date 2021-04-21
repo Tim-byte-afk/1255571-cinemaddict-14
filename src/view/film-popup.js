@@ -1,4 +1,5 @@
-import {arrayToString, getDateFilm, getDateComment, createElement} from '../utils/common';
+import {arrayToString, getDateFilm, getDateComment} from '../utils/common';
+import AbstractView from './abstract.js';
 
 const createFilmPopupTemplate = ({film_info, comments}) => {
   const {title, alternative_title, total_rating, release, runtime, genre, poster, description, age_rating, director, writers, actors} = film_info;
@@ -147,25 +148,29 @@ const createCommentTemplate = (comment) => {
   );
 };
 
-export default class FilmPopup {
+export default class FilmPopup extends AbstractView {
   constructor(film) {
-    this._element = null;
+    super();
     this._film = film;
+    this._clickHandler = this._clickHandler.bind(this);
   }
 
   getTemplate() {
     return createFilmPopupTemplate(this._film);
   }
 
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
+  setPopupOpen() {
+    this.getElement().classList.remove('visually-hidden');
   }
 
-  removeElement() {
-    this._element = null;
+  _clickHandler(evt) {
+    evt.preventDefault();
+    this._callback.click();
   }
+
+  setClickHandler(callback) {
+    this._callback.click = callback;
+    this.getElement().querySelector('.film-details__close-btn').addEventListener('click', this._clickHandler);
+  }
+
 }

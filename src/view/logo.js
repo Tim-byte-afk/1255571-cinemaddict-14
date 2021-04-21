@@ -1,4 +1,4 @@
-import {createElement} from '../utils/common';
+import AbstractView from './abstract.js';
 
 const createLogoTemplate = () => {
   return (
@@ -9,24 +9,10 @@ const createLogoTemplate = () => {
   );
 };
 
-export default class Logo {
-  constructor() {
-    this._element = null;
-  }
+export default class Logo extends AbstractView {
 
   getTemplate() {
     return createLogoTemplate();
   }
 
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
-  }
 }

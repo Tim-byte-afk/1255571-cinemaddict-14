@@ -1,6 +1,6 @@
-import {createElement} from '../utils/common';
+import AbstractView from './abstract.js';
 
-const createMenuTemplate = (countWatchlist = 0, countHistory = 0, countFavorites = 0) => {
+const createMenuTemplate = ([countWatchlist = 0, countHistory = 0, countFavorites = 0]) => {
   return (
     `<nav class="main-navigation">
       <div class="main-navigation__items">
@@ -14,24 +14,14 @@ const createMenuTemplate = (countWatchlist = 0, countHistory = 0, countFavorites
   );
 };
 
-export default class Menu {
-  constructor() {
-    this._element = null;
+export default class Menu extends AbstractView {
+  constructor(...menuCounters) {
+    super();
+    this.menuCounters = menuCounters;
   }
 
   getTemplate() {
-    return createMenuTemplate();
+    return createMenuTemplate(this.menuCounters);
   }
 
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
-  }
 }
