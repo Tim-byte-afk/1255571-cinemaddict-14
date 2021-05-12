@@ -1,13 +1,16 @@
 import {arrayToString, getDateFilm, getDateComment} from '../utils/common';
 import AbstractView from './abstract.js';
 
-const createFilmPopupTemplate = ({film_info, comments}) => {
+const createFilmPopupTemplate = ({film_info, comments, user_details}) => {
   const {title, alternative_title, total_rating, release, runtime, genre, poster, description, age_rating, director, writers, actors} = film_info;
+  const {watchlist, already_watched, favorite} = user_details;
 
   const authors = arrayToString(writers);
   const mummers = arrayToString(actors);
 
   const releaseDate = getDateFilm(release.date);
+
+  const activeButton = 'checked="checked"';
 
   return (
     `<section class="film-details visually-hidden">
@@ -73,13 +76,13 @@ const createFilmPopupTemplate = ({film_info, comments}) => {
           </div>
 
           <section class="film-details__controls">
-            <input type="checkbox" class="film-details__control-input visually-hidden" id="watchlist" name="watchlist">
+            <input type="checkbox" ${watchlist && activeButton} class="film-details__control-input visually-hidden" id="watchlist" name="watchlist">
             <label for="watchlist" class="film-details__control-label film-details__control-label--watchlist">Add to watchlist</label>
 
-            <input type="checkbox" class="film-details__control-input visually-hidden" id="watched" name="watched">
+            <input type="checkbox" ${already_watched && activeButton} class="film-details__control-input visually-hidden" id="watched" name="watched">
             <label for="watched" class="film-details__control-label film-details__control-label--watched">Already watched</label>
 
-            <input type="checkbox" class="film-details__control-input visually-hidden" id="favorite" name="favorite">
+            <input type="checkbox" ${favorite && activeButton} class="film-details__control-input visually-hidden" id="favorite" name="favorite">
             <label for="favorite" class="film-details__control-label film-details__control-label--favorite">Add to favorites</label>
           </section>
         </div>
@@ -153,14 +156,24 @@ export default class FilmPopup extends AbstractView {
     super();
     this._film = film;
     this._clickHandler = this._clickHandler.bind(this);
+
+    this._favoriteClickHandler = this._favoriteClickHandler.bind(this);
+    this._watchlistClickHandler = this._watchlistClickHandler.bind(this);
+    this._watchedClickHandler = this._watchedClickHandler.bind(this);
   }
 
   getTemplate() {
     return createFilmPopupTemplate(this._film);
   }
 
-  setPopupOpen() {
+  setPopupOpen(siteBodyElement) {
     this.getElement().classList.remove('visually-hidden');
+
+    siteBodyElement.classList.add('hide-overflow');
+  }
+
+  setPopupClose(siteBodyElement) {
+    siteBodyElement.classList.remove('hide-overflow');
   }
 
   _clickHandler(evt) {
@@ -171,6 +184,36 @@ export default class FilmPopup extends AbstractView {
   setClickHandler(callback) {
     this._callback.click = callback;
     this.getElement().querySelector('.film-details__close-btn').addEventListener('click', this._clickHandler);
+  }
+
+  _favoriteClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.favoriteClick();
+  }
+
+  _watchlistClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.watchlistClick();
+  }
+
+  _watchedClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.watchedClick();
+  }
+
+  setFavoriteClickHandler(callback) {
+    this._callback.favoriteClick = callback;
+    this.getElement().querySelector('.film-details__control-label--favorite').addEventListener('click', this._favoriteClickHandler);
+  }
+
+  setWatchlistClickHandler(callback) {
+    this._callback.watchlistClick = callback;
+    this.getElement().querySelector('.film-details__control-label--watchlist').addEventListener('click', this._watchlistClickHandler);
+  }
+
+  setWatchedClickHandler(callback) {
+    this._callback.watchedClick = callback;
+    this.getElement().querySelector('.film-details__control-label--watched').addEventListener('click', this._watchedClickHandler);
   }
 
 }

@@ -166,8 +166,8 @@ const getMockArray = (count) => {
       },
       'user_details': {
         'watchlist': false,
-        'already_watched': true,
-        'watching_date': '2019-04-12T16:12:32.554Z',
+        'already_watched': false,
+        'watching_date': '',
         'favorite': false,
       },
     };

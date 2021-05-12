@@ -17,7 +17,7 @@ export const Titles = {
   EMPTY: 'There are no movies in our database',
 };
 
-export const SortingTypes = {
+export const SortTypes = {
   BY_DEFAULT: 'Sort by default',
   BY_DATE: 'Sort by date',
   BY_RAITING: 'Sort by rating',

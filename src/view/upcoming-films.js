@@ -17,4 +17,8 @@ export default class UpcomingFilms extends AbstractView {
     return createUpcomingFilmsTemplate();
   }
 
+  getContainerForRender() {
+    return this.getElement().querySelector('.films-list__upcoming');
+  }
+
 }
