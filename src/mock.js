@@ -136,7 +136,7 @@ const getMockArray = (count) => {
     const randomFilm = filmsList[getRandomInt(0, filmsList.length - 1)];
     const randomRating = getRandomInt(MIN_RATING, MAX_RATING) + '.' + getRandomInt(MIN_RATING, MAX_RATING);
     const randomDate = getRandomDate(new Date(MIN_YEARS, MIN_DAYS, MAX_DAYS), new Date(MAX_YEARS));
-    const randomRuntime = '1h ' + getRandomInt(MIN_MINUTS, MAX_MINUTS) + 'm';
+    const randomRuntime = 60 + getRandomInt(MIN_MINUTS, MAX_MINUTS);
     const id = 'f' + (i + 1);
     const descriptionArray = shuffle(descriptionList, getRandomInt(MIN_DESC_COUNT, MAX_DESC_COUNT));
     let description = '';

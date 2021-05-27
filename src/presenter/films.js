@@ -1,16 +1,20 @@
 import FilmCardView from '../view/film-card';
 import FilmPopupView from '../view/film-popup';
+import FilmComments from '../view/film-comments';
 import {render, replace, remove} from '../utils/render';
-import {Places} from '../const';
+import {Places, UserAction, UpdateType} from '../const';
 
 export default class Film {
-  constructor(bodySite, filmListContainer, changeData) {
+  constructor(bodySite, filmListContainer, changeData, api) {
     this._siteBodyElement = bodySite;
     this._filmListContainer = filmListContainer;
     this._changeData = changeData;
+    this._isPopupOpen = false;
 
     this._filmComponent = null;
     this._filmPopupComponent = null;
+
+    this._api = api;
 
     this._handleFavoriteClick = this._handleFavoriteClick.bind(this);
     this._handleWatchlistClick = this._handleWatchlistClick.bind(this);
@@ -18,6 +22,9 @@ export default class Film {
 
     this._onEscKeyDown = this._onEscKeyDown.bind(this);
     this._closePopup = this._closePopup.bind(this);
+
+    this._addCommentHandler = this._addCommentHandler.bind(this);
+    this._deleteCommentHandler = this._deleteCommentHandler.bind(this);
   }
 
   init(film, container) {
@@ -28,6 +35,12 @@ export default class Film {
 
     this._filmComponent = new FilmCardView(film);
     this._filmPopupComponent = new FilmPopupView(film);
+
+    this._api.getComments(this._film.id).then((response) => {
+      this._filmPopupCommentsComponent = new FilmComments(response);
+      this._filmPopupCommentsComponent.setFormSubmitHandler(this._addCommentHandler);
+      this._filmPopupCommentsComponent.setCommentDelateHandler(this._deleteCommentHandler);
+    });
 
     this._filmComponent.setFavoriteClickHandler(this._handleFavoriteClick);
     this._filmComponent.setWatchlistClickHandler(this._handleWatchlistClick);
@@ -59,8 +72,10 @@ export default class Film {
     remove(prevFilmComponent);
     remove(prevFilmPopupComponent);
 
-    this._openPopup();
-    document.addEventListener('keydown', this._onEscKeyDown);
+    if (this._isPopupOpen) {
+      this._openPopup();
+      document.addEventListener('keydown', this._onEscKeyDown);
+    }
 
   }
 
@@ -72,6 +87,7 @@ export default class Film {
   _removePopup() {
     this._filmPopupComponent.setPopupClose(this._siteBodyElement);
     this._filmPopupComponent.getElement().remove();
+    this._isPopupOpen = false;
   }
 
   _closePopup() {
@@ -80,7 +96,9 @@ export default class Film {
   }
 
   _openPopup() {
+    this._isPopupOpen = true;
     render(this._filmListContainer, this._filmPopupComponent, Places.BEFOREEND);
+    render(this._filmPopupComponent, this._filmPopupCommentsComponent, Places.BEFOREEND);
     this._filmPopupComponent.setPopupOpen(this._siteBodyElement);
 
     this._filmPopupComponent.setClickHandler(this._closePopup);
@@ -94,46 +112,80 @@ export default class Film {
     }
   }
 
-  _handleFavoriteClick() {
+  _handleFavoriteClick(typeForUpdate = UpdateType.MINOR) {
     this._changeData(
+      UserAction.UPDATE_FILM,
+      typeForUpdate,
       Object.assign(
         {},
         this._film,
+        this._film.user_details.favorite = !this._film.user_details.favorite,
+      ),
+    );
+  }
+
+  _handleWatchlistClick(typeForUpdate = UpdateType.MINOR) {
+    this._changeData(
+      UserAction.UPDATE_FILM,
+      typeForUpdate,
+      Object.assign(
+        {},
+        this._film,
+        this._film.user_details.watchlist = !this._film.user_details.watchlist,
+      ),
+    );
+  }
+
+  _handleWatchedClick(typeForUpdate = UpdateType.MINOR) {
+    this._changeData(
+      UserAction.UPDATE_FILM,
+      typeForUpdate,
+      Object.assign(
+        {},
+        this._film,
+        this._film.user_details.already_watched = !this._film.user_details.already_watched,
+        this._film.user_details.watching_date = Date.now(),
+      ),
+    );
+  }
+
+  _addCommentHandler(newComment) {
+    this._changeData(
+      UserAction.ADD_COMMENT,
+      UpdateType.PATCH,
+      Object.assign(
+        {},
         {
-          user_details: {
-            favorite: !this._film.user_details.favorite,
-          },
+          comment: newComment,
+        },
+        {
+          id: this._film.id,
         },
       ),
     );
   }
 
-  _handleWatchlistClick() {
+  _deleteCommentHandler(commentId) {
     this._changeData(
+      UserAction.DELETE_COMMENT,
+      UpdateType.PATCH,
       Object.assign(
         {},
-        this._film,
         {
-          user_details: {
-            watchlist: !this._film.user_details.watchlist,
-          },
+          commentId: commentId,
+        },
+        {
+          id: this._film.id,
         },
       ),
     );
   }
 
-  _handleWatchedClick() {
-    this._changeData(
-      Object.assign(
-        {},
-        this._film,
-        {
-          user_details: {
-            already_watched: !this._film.user_details.already_watched,
-            watching_date: Date.now(),
-          },
-        },
-      ),
-    );
+  hide() {
+    this._filmComponent.hide();
+  }
+
+  show() {
+    this._filmComponent.show();
   }
 }

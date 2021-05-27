@@ -8,6 +8,7 @@ const createFilmCardTemplate = ({film_info, comments, user_details}) => {
   const genreList = genre[0];
   const shortDesc = description.length > Variable.MAX_COUNT_CHARACTER ? description.slice(0, Variable.MAX_COUNT_CHARACTER) + '...' : description ;
   const date = new Date(release.date).getFullYear();
+  const filmDur = `${parseInt(runtime/60)}h ${parseInt(runtime%60)}m`;
   const activeButton = 'film-card__controls-item--active';
 
   return (
@@ -16,7 +17,7 @@ const createFilmCardTemplate = ({film_info, comments, user_details}) => {
       <p class="film-card__rating">${total_rating}</p>
       <p class="film-card__info">
         <span class="film-card__year">${date}</span>
-        <span class="film-card__duration">${runtime}</span>
+        <span class="film-card__duration">${filmDur}</span>
         <span class="film-card__genre">${genreList}</span>
       </p>
       <img src="${poster}" alt="" class="film-card__poster">

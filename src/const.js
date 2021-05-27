@@ -24,6 +24,41 @@ export const SortTypes = {
   BY_COMMENTING: 'Sort by commenting',
 };
 
+export const FilterTypes = {
+  BY_DEFAULT: 'all',
+  WATCHLIST: 'watchlist',
+  HISTORY: 'history',
+  FAVORITES: 'favorites',
+};
+
+export const UserAction = {
+  UPDATE_FILM: 'UPDATE_FILM',
+  ADD_FILM: 'ADD_FILM',
+  DELETE_FILM: 'DELETE_FILM',
+  DELETE_COMMENT: 'DELETE_COMMENT',
+  ADD_COMMENT: 'ADD_COMMENT',
+};
+
+export const UpdateType = {
+  PATCH: 'PATCH',
+  MINOR: 'MINOR',
+  MAJOR: 'MAJOR',
+  INIT: 'INIT',
+};
+
+export const StatisticsType = {
+  ALL: 'All time',
+  TODAY: 'Today',
+  WEEK: 'Week',
+  MONTH: 'Month',
+  YEAR: 'Year',
+};
+
+export const MenuItem = {
+  FILTER: 'FILTER',
+  STATISTICS: 'STATISTICS',
+};
+
 export const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December',
 ];
