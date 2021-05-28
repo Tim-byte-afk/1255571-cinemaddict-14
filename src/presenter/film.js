@@ -172,8 +172,8 @@ export default class Film {
       Object.assign(
         {},
         this._film,
-        this._film.user_details.already_watched = !this._film.user_details.already_watched,
-        this._film.user_details.watching_date = new Date().toISOString(),
+        this._film.user_details['already_watched'] = !this._film.user_details['already_watched'],
+        this._film.user_details['watching_date'] = new Date().toISOString(),
       ),
     );
   }

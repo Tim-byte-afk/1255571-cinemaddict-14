@@ -1,9 +1,15 @@
 import {Variable} from '../const';
 import AbstractView from './abstract.js';
 
-const createFilmCardTemplate = ({film_info, comments, user_details}) => {
-  const {id, title, total_rating, release, runtime, genre, poster, description} = film_info;
-  const {watchlist, already_watched, favorite} = user_details;
+const createFilmCardTemplate = (data) => {
+  const userDetails = data['user_details'];
+  const filmInfo = data['film_info'];
+
+  const {id, title, release, runtime, genre, poster, description} = filmInfo;
+  const {watchlist, favorite} = userDetails;
+
+  const alreadyWatched = userDetails['already_watched'];
+  const totalRating = filmInfo['total_rating'];
 
   const genreList = genre[0];
   const shortDesc = description.length > Variable.MAX_COUNT_CHARACTER ? description.slice(0, Variable.MAX_COUNT_CHARACTER) + '...' : description ;
@@ -14,7 +20,7 @@ const createFilmCardTemplate = ({film_info, comments, user_details}) => {
   return (
     `<article id='${id}_${date}' class="film-card">
       <h3 class="film-card__title">${title}</h3>
-      <p class="film-card__rating">${total_rating}</p>
+      <p class="film-card__rating">${totalRating}</p>
       <p class="film-card__info">
         <span class="film-card__year">${date}</span>
         <span class="film-card__duration">${filmDur}</span>
@@ -22,10 +28,10 @@ const createFilmCardTemplate = ({film_info, comments, user_details}) => {
       </p>
       <img src="${poster}" alt="" class="film-card__poster">
       <p class="film-card__description">${shortDesc}</p>
-      <a class="film-card__comments">${comments.length} comments</a>
+      <a class="film-card__comments">${data['comments'].length} comments</a>
       <div class="film-card__controls">
         <button class="film-card__controls-item button film-card__controls-item--add-to-watchlist ${watchlist && activeButton}" type="button">Add to watchlist</button>
-        <button class="film-card__controls-item button film-card__controls-item--mark-as-watched ${already_watched && activeButton}" type="button">Mark as watched</button>
+        <button class="film-card__controls-item button film-card__controls-item--mark-as-watched ${alreadyWatched && activeButton}" type="button">Mark as watched</button>
         <button class="film-card__controls-item button film-card__controls-item--favorite ${favorite && activeButton}" type="button">Mark as favorite</button>
       </div>
     </article>`

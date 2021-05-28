@@ -2,9 +2,17 @@ import {arrayToString, getDateFilm} from '../utils/common';
 import AbstractView from './abstract.js';
 import {UpdateType} from '../const';
 
-const createFilmPopupTemplate = ({film_info, user_details}) => {
-  const {title, alternative_title, total_rating, release, runtime, genre, poster, description, age_rating, director, writers, actors} = film_info;
-  const {watchlist, already_watched, favorite} = user_details;
+const createFilmPopupTemplate = (data) => {
+  const filmInfo = data['film_info'];
+  const userDetails = data['user_details'];
+
+  const {title, release, runtime, genre, poster, description, director, writers, actors} = filmInfo;
+  const {watchlist, favorite} = userDetails;
+
+  const alternativeTitle = filmInfo['alternative_title'];
+  const totalRating = filmInfo['total_rating'];
+  const ageRating = filmInfo['age_rating'];
+  const alreadyWatched = userDetails['already_watched'];
 
   const authors = arrayToString(writers);
   const mummers = arrayToString(actors);
@@ -23,18 +31,18 @@ const createFilmPopupTemplate = ({film_info, user_details}) => {
           <div class="film-details__poster">
             <img class="film-details__poster-img" src="${poster}" alt="">
 
-            <p class="film-details__age">${age_rating}</p>
+            <p class="film-details__age">${ageRating}</p>
           </div>
 
           <div class="film-details__info">
             <div class="film-details__info-head">
               <div class="film-details__title-wrap">
                 <h3 class="film-details__title">${title}</h3>
-                <p class="film-details__title-original">Original: ${alternative_title}</p>
+                <p class="film-details__title-original">Original: ${alternativeTitle}</p>
               </div>
 
               <div class="film-details__rating">
-                <p class="film-details__total-rating">${total_rating}</p>
+                <p class="film-details__total-rating">${totalRating}</p>
               </div>
             </div>
 
@@ -61,7 +69,7 @@ const createFilmPopupTemplate = ({film_info, user_details}) => {
               </tr>
               <tr class="film-details__row">
                 <td class="film-details__term">Country</td>
-                <td class="film-details__cell">${release.release_country}</td>
+                <td class="film-details__cell">${release['release_country']}</td>
               </tr>
               <tr class="film-details__row">
                 <td class="film-details__term">Genres</td>
@@ -79,7 +87,7 @@ const createFilmPopupTemplate = ({film_info, user_details}) => {
           <input type="checkbox" ${watchlist && activeButton} class="film-details__control-input visually-hidden" id="watchlist" name="watchlist">
           <label for="watchlist" class="film-details__control-label film-details__control-label--watchlist">Add to watchlist</label>
 
-          <input type="checkbox" ${already_watched && activeButton} class="film-details__control-input visually-hidden" id="watched" name="watched">
+          <input type="checkbox" ${alreadyWatched && activeButton} class="film-details__control-input visually-hidden" id="watched" name="watched">
           <label for="watched" class="film-details__control-label film-details__control-label--watched">Already watched</label>
 
           <input type="checkbox" ${favorite && activeButton} class="film-details__control-input visually-hidden" id="favorite" name="favorite">
