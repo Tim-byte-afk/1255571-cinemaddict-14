@@ -63,7 +63,6 @@ export default class Board {
 
     this._filmsModel.addObserver(this._handleModelEvent);
     this._filterModel.addObserver(this._handleModelEvent);
-    this._renderLogo(null);
 
     this._renderBoard();
   }
@@ -72,6 +71,8 @@ export default class Board {
     const filterType = this._filterModel.getFilter();
     const films = this._filmsModel.get();
     const filtredFilms = filtering(films, filterType);
+
+    this._renderLogo(films);
 
     switch (this._currentSortType) {
       case SortTypes.BY_DATE:
@@ -230,7 +231,6 @@ export default class Board {
     if (filmsCount > this._renderedFilmsCount) {
       this._renderLoadMoreButton();
     }
-    this._renderLogo(films);
   }
 
   _clearBoard({resetRenderedFilmCount = false, resetSortType = false} = {}) {
