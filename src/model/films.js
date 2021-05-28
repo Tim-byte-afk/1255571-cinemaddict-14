@@ -49,7 +49,7 @@ export default class Films extends Observer {
     }
     const film = this._films[index];
     let filmComments = film.comments;
-    filmComments = filmComments.filter((comment) => comment.id !== update.commentId);
+    filmComments = filmComments.filter((comment) => comment !== update.commentId);
     film.comments = filmComments;
 
     this._films = [

@@ -131,7 +131,6 @@ export default class FilmComments extends Smart {
     deletingElement.style.animation = SNAKE_CLASS;
     setTimeout(() => {
       deletingElement.style.animation = '';
-      // callback();
     }, SHAKE_ANIMATION_TIMEOUT);
   }
 
@@ -158,7 +157,7 @@ export default class FilmComments extends Smart {
   }
 
   _formSubmitHandler(evt) {
-    if (evt.ctrlKey && evt.keyCode == 13) {
+    if ((evt.ctrlKey && evt.keyCode == 13) || (evt.metaKey && evt.keyCode == 13)) {
       evt.preventDefault();
       if (this._data.currentEmoji === null || this._data.newEmojiText === '' || this._data.newEmojiText.trim() === '') {
         this.shakeForm();

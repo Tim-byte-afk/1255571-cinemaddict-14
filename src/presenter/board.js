@@ -259,16 +259,20 @@ export default class Board {
   }
 
   hide() {
-    Object.values(this._filmPresenter)
-      .forEach((filmPresenter) => filmPresenter.hide());
-    this._sortComponent.hide();
-    this._showMoreButtonComponent.hide();
+    if (Object.keys(this._filmPresenter).length) {
+      Object.values(this._filmPresenter)
+        .forEach((filmPresenter) => filmPresenter.hide());
+      this._sortComponent.hide();
+      this._showMoreButtonComponent.hide();
+    }
   }
 
   show() {
-    Object.values(this._filmPresenter)
-      .forEach((filmPresenter) => filmPresenter.show());
+    if (Object.keys(this._filmPresenter).length) {
+      Object.values(this._filmPresenter)
+        .forEach((filmPresenter) => filmPresenter.show());
+      this._showMoreButtonComponent.show();
+    }
     this._sortComponent.show();
-    this._showMoreButtonComponent.show();
   }
 }

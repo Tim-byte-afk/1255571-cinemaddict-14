@@ -5,10 +5,10 @@ const createFilterItemTemplate = (filter, currentFilterType) => {
   const {type, name, count} = filter;
 
   const activeItem = 'main-navigation__item--active';
-  const itemCount = `<span class="main-navigation__item-count">${count}</span>`;
+  const itemCount = `<span class="main-navigation__item-count" data-filter-type="${type}">${count}</span>`;
 
   return (
-    `<a href="#${type}" class="main-navigation__item ${currentFilterType == type ? activeItem : ''}" data-filter-type="${type}">${name} ${type !== FilterTypes.BY_DEFAULT ? itemCount : ''}</a>`
+    `<a href="#${type}" class="main-navigation__item ${currentFilterType == type ? activeItem : ''}" data-filter-type="${type}">${name}  ${type !== FilterTypes.BY_DEFAULT ? itemCount : ''}</a>`
   );
 };
 
@@ -42,10 +42,6 @@ export default class Filter extends AbstractView {
   }
 
   _filterClickHandler(evt) {
-    if (evt.target.tagName !== 'A') {
-      return;
-    }
-
     evt.preventDefault();
     this._callback.filterChangeClick(evt.target.dataset.filterType);
   }
@@ -53,6 +49,7 @@ export default class Filter extends AbstractView {
   setFilterChangeHandler(callback) {
     this._callback.filterChangeClick = callback;
     this.getElement().querySelectorAll('.main-navigation__item').forEach((element) => {
+
       element.addEventListener('click', this._filterClickHandler);
     });
   }
@@ -67,8 +64,7 @@ export default class Filter extends AbstractView {
 
   _menuClickHandler(evt) {
     evt.preventDefault();
-
-    if(evt.target.classList.contains('main-navigation__item')) {
+    if(evt.target.classList.contains('main-navigation__item') || evt.target.parentNode.classList.contains('main-navigation__item')) {
       this.getElement().querySelectorAll('.main-navigation__item--active').forEach((element) => {
         element.classList.remove('main-navigation__item--active');
       });

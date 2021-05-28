@@ -1,4 +1,5 @@
 import FilmCardView from '../view/film-card';
+import FilmFormPopupView from '../view/film-form-popup';
 import FilmPopupView from '../view/film-popup';
 import FilmComments from '../view/film-comments';
 import {render, replace, remove} from '../utils/render';
@@ -14,6 +15,7 @@ export default class Film {
     this._filmComponent = null;
     this._filmPopupComponent = null;
     this._filmPopupCommentsComponent = null;
+    this._filmFormPopupComponent = new FilmFormPopupView();
 
     this._api = api;
 
@@ -60,11 +62,10 @@ export default class Film {
       replace(this._filmComponent, prevFilmComponent);
     }
 
-    if (this._filmListContainer.contains(prevFilmPopupComponent.getElement())) {
-      this._renderComments();
+    if (this._filmFormPopupComponent.getElement().contains(prevFilmPopupComponent.getElement())) {
       replace(this._filmPopupComponent, prevFilmPopupComponent);
-      this._filmPopupComponent.setPopupOpen(this._siteBodyElement);
-
+      this._renderComments();
+      this._filmPopupComponent.setClickHandler(this._closePopup);
     }
 
     remove(prevFilmComponent);
@@ -74,26 +75,45 @@ export default class Film {
 
   destroy() {
     remove(this._filmComponent);
+    remove(this._filmFormPopupComponent);
     remove(this._filmPopupComponent);
     remove(this._filmPopupCommentsComponent);
   }
 
   _renderComments() {
     this._api.getComments(this._film.id).then((response) => {
+      const prevFilmPopupCommentsComponent = this._filmPopupCommentsComponent;
 
       this._filmPopupCommentsComponent = new FilmComments(response);
       this._filmPopupCommentsComponent.setFormSubmitHandler(this._addCommentHandler);
       this._filmPopupCommentsComponent.setCommentDelateHandler(this._deleteCommentHandler);
 
-      const filmDetailsElement = this._filmPopupComponent.getElement().querySelector('.film-details__inner');
-      render(filmDetailsElement, this._filmPopupCommentsComponent, Places.BEFOREEND);
+      const filmDetailsElement = this._filmFormPopupComponent.getElement().querySelector('.film-details__inner');
+
+      if (prevFilmPopupCommentsComponent === null) {
+        render(filmDetailsElement, this._filmPopupCommentsComponent, Places.BEFOREEND);
+
+        return;
+      }
+
+      if (this._filmFormPopupComponent.getElement().contains(prevFilmPopupCommentsComponent.getElement())) {
+        replace(this._filmPopupCommentsComponent, prevFilmPopupCommentsComponent);
+      }
+
+      if (prevFilmPopupCommentsComponent !== null) {
+        render(filmDetailsElement, this._filmPopupCommentsComponent, Places.BEFOREEND);
+
+        return;
+      }
+
+      remove(prevFilmPopupCommentsComponent);
 
     });
   }
 
   _removePopup() {
-    this._filmPopupComponent.setPopupClose(this._siteBodyElement);
-    this._filmPopupComponent.getElement().remove();
+    this._filmFormPopupComponent.setPopupClose(this._siteBodyElement);
+    this._filmFormPopupComponent.getElement().remove();
     this._filmPopupCommentsComponent.getElement().remove();
     this._isPopupOpen = false;
   }
@@ -105,9 +125,10 @@ export default class Film {
 
   _openPopup() {
     this._isPopupOpen = true;
-    render(this._filmListContainer, this._filmPopupComponent, Places.BEFOREEND);
+    render(this._filmListContainer, this._filmFormPopupComponent, Places.BEFOREEND);
+    render(this._filmFormPopupComponent.getElement().querySelector('.film-details__inner'), this._filmPopupComponent, Places.BEFOREEND);
     this._renderComments();
-    this._filmPopupComponent.setPopupOpen(this._siteBodyElement);
+    this._filmFormPopupComponent.setPopupOpen(this._siteBodyElement);
 
     this._filmPopupComponent.setClickHandler(this._closePopup);
   }

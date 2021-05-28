@@ -36,7 +36,9 @@ presenter.init();
 const handleSiteMenuClick = (menuItem) => {
   switch (menuItem) {
     case MenuItem.FILTER:
-      statisticComponent.hide();
+      if (statisticComponent !== null) {
+        statisticComponent.hide();
+      }
       presenter.show();
       break;
     case MenuItem.STATISTICS:
