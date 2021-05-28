@@ -2,6 +2,7 @@ import {Variable} from '../const';
 import AbstractView from './abstract.js';
 
 const createFilmCardTemplate = (data) => {
+
   const userDetails = data['user_details'];
   const filmInfo = data['film_info'];
 
