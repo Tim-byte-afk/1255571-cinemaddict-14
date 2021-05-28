@@ -1,6 +1,9 @@
 import dayjs from 'dayjs';
 import he from 'he';
-import Smart from './abstract-smart';
+import Smart from './smart';
+
+const SHAKE_ANIMATION_TIMEOUT = 600;
+const SNAKE_CLASS = `shake ${SHAKE_ANIMATION_TIMEOUT / 1000}s`;
 
 const createCommentList = ({comments, isDeleting, isSaving, newEmojiText, deletingCommentId, currentEmoji}) => {
   const EMOJIS_LIST = ['smile', 'sleeping', 'puke', 'angry'];
@@ -114,23 +117,22 @@ export default class FilmComments extends Smart {
     });
   }
 
-  shakeForm(callback) {
-    this.getElement().querySelector('.film-details__new-comment').style.animation = `shake ${600 / 1000}s`;
+  shakeForm() {
+    this.getElement().querySelector('.film-details__new-comment').style.animation = SNAKE_CLASS;
     setTimeout(() => {
       this.getElement().querySelector('.film-details__new-comment').style.animation = '';
-      callback();
-    }, 600);
+    }, SHAKE_ANIMATION_TIMEOUT);
   }
 
-  shakeComment(callback, deletingCommentId) {
+  shakeComment(deletingCommentId) {
     const deletingElement = Array.from(this.getElement().querySelectorAll('.film-details__comment')).find((element) => {
       return element.querySelector('.film-details__comment-delete').dataset.commentIndex === deletingCommentId;
     });
-    deletingElement.style.animation = `shake ${600 / 1000}s`;
+    deletingElement.style.animation = SNAKE_CLASS;
     setTimeout(() => {
       deletingElement.style.animation = '';
-      callback();
-    }, 600);
+      // callback();
+    }, SHAKE_ANIMATION_TIMEOUT);
   }
 
   _setInnerHandlers() {
@@ -158,9 +160,13 @@ export default class FilmComments extends Smart {
   _formSubmitHandler(evt) {
     if (evt.ctrlKey && evt.keyCode == 13) {
       evt.preventDefault();
-      if (this._data.currentEmoji === null || this._data.newEmojiText === '') {
+      if (this._data.currentEmoji === null || this._data.newEmojiText === '' || this._data.newEmojiText.trim() === '') {
+        this.shakeForm();
+
         return;
       }
+
+      this._data.newEmojiText.trim();
       this._callback.formSubmit(FilmComments.parseDataToNewComment(this._data));
     }
   }

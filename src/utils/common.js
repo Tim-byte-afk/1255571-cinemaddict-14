@@ -1,6 +1,13 @@
 import {SortTypes, MONTH_NAMES, FilterTypes} from '../const';
 import dayjs from 'dayjs';
 
+const NOVICE_MIN = 10;
+
+const FAN_MIN = 11;
+const FAN_MAX = 20;
+
+const MOVIE_BUFF_MIN = 21;
+
 const getRandomInt = (min, max) => {
   min = Math.ceil(min);
   max = Math.floor(max);
@@ -105,7 +112,7 @@ const getDateComment = (date) => {
 const getRank = (films) => {
   let count = 0;
 
-  if (films.length === 0) {
+  if (!films.length) {
     return '';
   }
 
@@ -115,11 +122,11 @@ const getRank = (films) => {
     }
   });
 
-  if (count > 0 && count <= 10) {
+  if (count > 0 && count <= NOVICE_MIN) {
     return 'novice';
-  } else if (count >= 1 && count <=20) {
+  } else if (count >= FAN_MIN && count <=FAN_MAX) {
     return 'fan';
-  } else if (count >= 21) {
+  } else if (count >= MOVIE_BUFF_MIN) {
     return 'movie buff';
   } else {
     return '';
@@ -129,7 +136,7 @@ const getRank = (films) => {
 const getRunTime = (films) => {
   let runTime = 0;
 
-  if (films.length === 0) {
+  if (!films.length) {
     return runTime;
   }
 
@@ -149,7 +156,7 @@ const getRunTimeMinutes = (films) => {
 };
 
 const getWatchedCount = (films) => {
-  if (films.length === 0) {
+  if (!films.length) {
     return 0;
   }
 
@@ -186,7 +193,7 @@ const getGenres = (films) => {
 };
 
 const getTopGenre = (films) => {
-  if (films.length === 0) {
+  if (!films.length) {
     return '';
   }
   return getGenresCount(films)[0].genreName;
@@ -203,8 +210,8 @@ const getFilmsInDateRange = (films, dateFrom) => {
 };
 
 const getSortedFilms = (data) => {
-  const watchedFilms = data.films.slice().filter((film) => film.user_details.watching_date === true);
-  const sortedFilms = data.dateFrom === null ? watchedFilms : getFilmsInDateRange(watchedFilms, data.dateFrom);
+  const watchedFilms = data.films.slice().filter((film) => film.user_details.already_watched === true);
+  const sortedFilms = data.dateFrom === null ? watchedFilms.slice() : getFilmsInDateRange(watchedFilms, data.dateFrom);
   return sortedFilms;
 };
 

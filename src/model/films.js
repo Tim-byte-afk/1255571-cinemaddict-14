@@ -6,13 +6,13 @@ export default class Films extends Observer {
     this._films = [];
   }
 
-  setFilms(updateType, films) {
+  set(updateType, films) {
     this._films = films.slice();
 
     this._notify(updateType, films);
   }
 
-  getFilms() {
+  get() {
     return this._films;
   }
 
@@ -41,21 +41,6 @@ export default class Films extends Observer {
     this._notify(updateType, update);
   }
 
-  deleteFilm(updateType, update) {
-    const index = this._films.findIndex((film) => film.id === update.id);
-
-    if (index === -1) {
-      throw new Error('Can\'t delete unexisting film');
-    }
-
-    this._films = [
-      ...this._films.slice(0, index),
-      ...this._films.slice(index + 1),
-    ];
-
-    this._notify(updateType);
-  }
-
   deleteComment(updateType, update) {
     const index = this._films.findIndex((film) => film.id === update.id);
 
@@ -66,27 +51,31 @@ export default class Films extends Observer {
     let filmComments = film.comments;
     filmComments = filmComments.filter((comment) => comment.id !== update.commentId);
     film.comments = filmComments;
+
+    this._films = [
+      ...this._films.slice(0, index),
+      film,
+      ...this._films.slice(index + 1),
+    ];
+
     this._notify(updateType, film);
   }
 
   addComment(updateType, update) {
-    const index = this._films.findIndex((film) => film.id === update.id);
+    const index = this._films.findIndex((film) => film.id === update.movie.id);
     if (index === -1) {
       throw new Error('Can\'t delete unexisting film');
     }
     const film = this._films[index];
-    const filmComments = film.comments;
 
-    const newComment = {
-      id: `${update.comment.commentText}+${update.comment.emotion}`,
-      author: 'test',
-      date: '2019-01-11T16:12:32.554Z',
-      comment: `${update.comment.commentText}`,
-      emotion: `${update.comment.emotion}`,
-    };
+    film.comments = update.movie.comments;
 
-    filmComments.push(newComment);
-    film.comments = filmComments;
+    this._films = [
+      ...this._films.slice(0, index),
+      film,
+      ...this._films.slice(index + 1),
+    ];
+
     this._notify(updateType, film);
   }
 

@@ -51,7 +51,10 @@ export default class Api {
     return this._load({
       url: `comments/${filmId}`,
       method: Method.POST,
-      body: JSON.stringify(newComment),
+      body: JSON.stringify({
+        comment: newComment.comment,
+        emotion: newComment.emotion,
+      }),
       headers: new Headers({'Content-Type': 'application/json'}),
     })
       .then(Api.toJSON);
@@ -66,7 +69,7 @@ export default class Api {
     headers.append('Authorization', this._authorization);
 
     return fetch(
-      `${this._endPoint}/${url}`,
+      `${this._endPoint}${url}`,
       {method, body, headers},
     )
       .then(Api.checkStatus)

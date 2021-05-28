@@ -12,7 +12,7 @@ import FilmsModel from './model/films';
 import FilterModel from './model/filter.js';
 import StatisticsView from './view/statistics.js';
 
-const AUTHORIZATION = 'Basic er883jdzbdw';
+const AUTHORIZATION = 'Basic Hsk3svvnt84';
 const END_POINT = 'https://14.ecmascript.pages.academy/cinemaddict/';
 
 const api = new Api(END_POINT, AUTHORIZATION);
@@ -28,12 +28,10 @@ const filterModel = new FilterModel();
 const presenter = new Board(siteBodyElement, siteMainElement, filmsModel, filterModel, siteHeaderElement, api);
 const filterPresenter = new FilterPresenter(siteMainElement, filterModel, filmsModel);
 
-const statisticComponent = new StatisticsView(filmsModel.getFilms());
-render(siteMainElement, statisticComponent, Places.BEFOREEND);
+let statisticComponent = null;
 
 filterPresenter.init();
 presenter.init();
-statisticComponent.hide();
 
 const handleSiteMenuClick = (menuItem) => {
   switch (menuItem) {
@@ -42,6 +40,8 @@ const handleSiteMenuClick = (menuItem) => {
       presenter.show();
       break;
     case MenuItem.STATISTICS:
+      statisticComponent = new StatisticsView(filmsModel.get());
+      render(siteMainElement, statisticComponent, Places.BEFOREEND);
       presenter.hide();
       statisticComponent.show();
       break;
@@ -52,14 +52,12 @@ const siteFooterStatisticsElement = siteBodyElement.querySelector('.footer__stat
 
 api.getFilms()
   .then((films) => {
-    filmsModel.setFilms(UpdateType.INIT, films);
-    render(siteMainElement, statisticComponent, Places.BEFOREEND);
+    filmsModel.set(UpdateType.INIT, films);
     render(siteFooterStatisticsElement, new FooterStatisticsView(films.length), Places.BEFOREEND);
     filterPresenter.setMenuClickHandler(handleSiteMenuClick);
   })
   .catch(() => {
-    filmsModel.setFilms(UpdateType.INIT, []);
-    render(siteMainElement, statisticComponent, Places.BEFOREEND);
+    filmsModel.set(UpdateType.INIT, []);
     render(siteFooterStatisticsElement, new FooterStatisticsView([].length), Places.BEFOREEND);
     filterPresenter.setMenuClickHandler(handleSiteMenuClick);
   });

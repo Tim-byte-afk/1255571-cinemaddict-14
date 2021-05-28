@@ -1,12 +1,13 @@
 import dayjs from 'dayjs';
-import Smart from './abstract-smart';
+import Smart from './smart';
 import Chart from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import {getRank, getWatchedCount, getRunTimeHours, getRunTimeMinutes, getTopGenre, getSortedFilms, getGenres, getGenreNumber} from '../utils/common';
 import {StatisticsType} from '../const';
 
+const BAR_HEIGHT = 50;
+
 const renderChart = (statisticCtx, dataState) => {
-  const BAR_HEIGHT = 50;
   const films = getSortedFilms(dataState);
 
   statisticCtx.height = BAR_HEIGHT * getGenres(films).length;
@@ -72,7 +73,6 @@ const renderChart = (statisticCtx, dataState) => {
 const createStatsTemplate = (data) => {
   const currentFilter = data.currentFilter;
   const films = getSortedFilms(data);
-
   return (
     `<section class="statistic">
         <p class="statistic__rank">
@@ -84,7 +84,7 @@ const createStatsTemplate = (data) => {
         <form action="https://echo.htmlacademy.ru/" method="get" class="statistic__filters">
           <p class="statistic__filters-description">Show stats:</p>
 
-          <input type="radio" class="statistic__filters-input visually-hidden" name="statistic-filter" id="statistic-all-time" value="all-time" data-statistic-type = ${StatisticsType.ALL} ${currentFilter === StatisticsType.ALL? 'checked' : ''}>
+          <input type="radio" class="statistic__filters-input visually-hidden" name="statistic-filter" id="statistic-all-time" value="all-time" data-statistic-type = ${StatisticsType.ALL} ${currentFilter === StatisticsType.ALL ? 'checked' : ''}>
           <label for="statistic-all-time" class="statistic__filters-label">All time</label>
 
           <input type="radio" class="statistic__filters-input visually-hidden" name="statistic-filter" id="statistic-today" value="today" data-statistic-type = ${StatisticsType.TODAY} ${currentFilter === StatisticsType.TODAY? 'checked' : ''}>
@@ -179,6 +179,7 @@ export default class Statistics extends Smart {
       case StatisticsType.ALL:
         this.updateData({
           dateFrom: null,
+          currentFilter: StatisticsType.ALL,
         });
         break;
       case StatisticsType.TODAY:

@@ -47,7 +47,7 @@ export const UpdateType = {
 };
 
 export const StatisticsType = {
-  ALL: 'All time',
+  ALL: 'All',
   TODAY: 'Today',
   WEEK: 'Week',
   MONTH: 'Month',

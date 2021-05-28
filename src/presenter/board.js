@@ -3,7 +3,7 @@ import FilmsBlockView from '../view/films-block';
 import UpcomingFilmsView from '../view/upcoming-films';
 import TopRatedFilms from '../view/top-rated-films';
 import MostCommentedFilmsView from '../view/most-commented-films';
-import FilmPresenter from './films';
+import FilmPresenter from './film';
 import ShowMoreButtonView from '../view/show-more-button';
 import FilmsListTitleView from '../view/films-list-title';
 import LoadingView from '../view/loading.js';
@@ -70,7 +70,7 @@ export default class Board {
 
   _getFilms() {
     const filterType = this._filterModel.getFilter();
-    const films = this._filmsModel.getFilms();
+    const films = this._filmsModel.get();
     const filtredFilms = filtering(films, filterType);
 
     switch (this._currentSortType) {
@@ -133,7 +133,7 @@ export default class Board {
         this._filmsModel.deleteFilm(updateType, update);
         break;
       case UserAction.ADD_COMMENT:
-        this._api.addComment(update).then((response) => {
+        this._api.addComment(update, update.id).then((response) => {
           this._filmsModel.addComment(updateType, response);
         });
         break;
