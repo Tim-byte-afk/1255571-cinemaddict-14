@@ -188,6 +188,7 @@ const getGenresCount = (films) => {
   return genresNumbers;
 };
 
+
 const getGenres = (films) => {
   return getGenresCount(films).map((element) => element.genreName);
 };
