@@ -8,7 +8,7 @@ const createFilterItemTemplate = (filter, currentFilterType) => {
   const itemCount = `<span class="main-navigation__item-count" data-filter-type="${type}">${count}</span>`;
 
   return (
-    `<a href="#${type}" class="main-navigation__item ${currentFilterType == type ? activeItem : ''}" data-filter-type="${type}">${name}  ${type !== FilterTypes.BY_DEFAULT ? itemCount : ''}</a>`
+    `<a href="#${type}" class="main-navigation__item ${currentFilterType === type ? activeItem : ''}" data-filter-type="${type}">${name}  ${type !== FilterTypes.BY_DEFAULT ? itemCount : ''}</a>`
   );
 };
 

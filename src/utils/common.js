@@ -69,11 +69,11 @@ const filtering = (data, activeFilter) => {
   if (activeFilter === FilterTypes.BY_DEFAULT) {
     return data;
   } else if (activeFilter === FilterTypes.WATCHLIST) {
-    return data.slice().filter((film) => film.user_details.watchlist == true);
+    return data.slice().filter((film) => film.user_details.watchlist === true);
   } else if (activeFilter === FilterTypes.HISTORY) {
-    return data.slice().filter((film) => film.user_details.already_watched == true);
+    return data.slice().filter((film) => film.user_details.already_watched === true);
   } else if (activeFilter === FilterTypes.FAVORITES) {
-    return data.slice().filter((film) => film.user_details.favorite == true);
+    return data.slice().filter((film) => film.user_details.favorite === true);
   }
 
   return data;
@@ -85,15 +85,15 @@ const getFilterCounts = (data) => {
   let countFavorites = 0;
 
   data.forEach((film) => {
-    if (film.user_details.watchlist == true) {
+    if (film.user_details.watchlist === true) {
       countWatchlist++;
     }
 
-    if (film.user_details.already_watched == true) {
+    if (film.user_details.already_watched === true) {
       countHistory++;
     }
 
-    if (film.user_details.favorite == true) {
+    if (film.user_details.favorite === true) {
       countFavorites++;
     }
   });
@@ -117,7 +117,7 @@ const getRank = (films) => {
   }
 
   films.forEach((film) => {
-    if (film.user_details.already_watched == true) {
+    if (film.user_details.already_watched === true) {
       count++;
     }
   });
