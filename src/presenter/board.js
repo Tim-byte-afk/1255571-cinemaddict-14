@@ -9,7 +9,7 @@ import FilmsListTitleView from '../view/films-list-title';
 import LoadingView from '../view/loading.js';
 import LogoView from '../view/logo';
 import {render, remove} from '../utils/render';
-import {sortConditions, filtering} from '../utils/common';
+import {getSortConditions, getFilteredData} from '../utils/common';
 import {
   Variable,
   Places,
@@ -54,6 +54,11 @@ export default class Board {
     this._handleLoadMoreButtonClick = this._handleLoadMoreButtonClick.bind(this);
 
     this._handleSortTypeChange = this._handleSortTypeChange.bind(this);
+
+    this._handleAddFilmPopup = this._handleAddFilmPopup.bind(this);
+    this._handleRemoveFilmPopup = this._handleRemoveFilmPopup.bind(this);
+    this._filmPresenterPopup = null;
+    this._filmPresenterPopupId = null;
   }
 
   init() {
@@ -70,15 +75,15 @@ export default class Board {
   _getFilms() {
     const filterType = this._filterModel.getFilter();
     const films = this._filmsModel.get();
-    const filtredFilms = filtering(films, filterType);
+    const filtredFilms = getFilteredData(films, filterType);
 
     this._renderLogo(films);
 
     switch (this._currentSortType) {
       case SortTypes.BY_DATE:
-        return filtredFilms.slice().sort(sortConditions(SortTypes.BY_DATE));
+        return filtredFilms.slice().sort(getSortConditions(SortTypes.BY_DATE));
       case SortTypes.BY_RAITING:
-        return filtredFilms.slice().sort(sortConditions(SortTypes.BY_RAITING));
+        return filtredFilms.slice().sort(getSortConditions(SortTypes.BY_RAITING));
     }
 
     return filtredFilms;
@@ -134,13 +139,19 @@ export default class Board {
         this._filmsModel.deleteFilm(updateType, update);
         break;
       case UserAction.ADD_COMMENT:
+        this._filmPresenterPopup.setSaving();
         this._api.addComment(update, update.id).then((response) => {
           this._filmsModel.addComment(updateType, response);
+        }).catch(() => {
+          this._filmPresenterPopup.resetFormState();
         });
         break;
       case UserAction.DELETE_COMMENT:
+        this._filmPresenterPopup.setDeleting(update.commentId);
         this._api.deleteComment(update.commentId).then(() => {
           this._filmsModel.deleteComment(updateType, update);
+        }).catch(() => {
+          this._filmPresenterPopup.resetDeleteState(update.commentId);
         });
         break;
     }
@@ -152,7 +163,7 @@ export default class Board {
         this._filmPresenter[data.id].init(data, this._upcomingFilmsComponent);
         break;
       case UpdateType.MINOR:
-        this._clearBoard();
+        this._clearBoard({resetRenderedFilmCount: true});
         this._renderBoard();
         break;
       case UpdateType.MAJOR:
@@ -167,18 +178,32 @@ export default class Board {
     }
   }
 
+  _handleAddFilmPopup(filmId) {
+    this._filmPresenterPopup = this._filmPresenter[filmId];
+    this._filmPresenterPopupId = filmId;
+  }
+
+  _handleRemoveFilmPopup() {
+    this._filmPresenterPopup = null;
+    this._filmPresenterPopupId = null;
+  }
+
   _renderLoading() {
     render(this._upcomingFilmsComponent, this._loadingComponent, Places.AFTERBEGIN);
   }
 
   _renderFilm(film, container) {
-    const filmPresenter = new FilmPresenter(this._siteBodyElement, this._boardContainer, this._handleViewAction, this._api);
+    const filmPresenter = new FilmPresenter(this._siteBodyElement, this._boardContainer, this._handleViewAction, this._api, this._handleAddFilmPopup, this._handleRemoveFilmPopup);
     filmPresenter.init(film, container);
     this._filmPresenter[film.id] = filmPresenter;
   }
 
   _renderFilms(films) {
-    films.forEach((task) => this._renderFilm(task, this._upcomingFilmsComponent));
+    films.forEach((film) => this._renderFilm(film, this._upcomingFilmsComponent));
+    if(this._filmPresenterPopup !== null && this._filmPresenterPopupId !== null) {
+      const film = this._filmsModel.get().slice().find((film) =>film.id === this._filmPresenterPopupId);
+      this._filmPresenterPopup.init(film, this._upcomingFilmsComponent);
+    }
   }
 
   _renderNoTasks() {
@@ -247,11 +272,7 @@ export default class Board {
     remove(this._loadingComponent);
     remove(this._logoComponent);
 
-    if (resetRenderedFilmCount) {
-      this._renderedFilmsCount = Variable.FILM_COUNT;
-    } else {
-      this._renderedFilmsCount = Math.min(filmCount, this._renderedFilmsCount);
-    }
+    this._renderedFilmsCount = resetRenderedFilmCount ? this._renderedFilmsCount = Variable.FILM_COUNT : this._renderedFilmsCount = Math.min(filmCount, this._renderedFilmsCount);
 
     if (resetSortType) {
       this._currentSortType = SortTypes.BY_DEFAULT;

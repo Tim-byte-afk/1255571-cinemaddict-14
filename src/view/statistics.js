@@ -155,6 +155,10 @@ export default class Statistics extends Smart {
     });
   }
 
+  destroy() {
+    this.getElement().remove();
+  }
+
   _setCharts() {
     if (this._data.films.length === 0) {
       this._chart = null;

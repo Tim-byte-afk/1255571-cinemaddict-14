@@ -1,26 +1,17 @@
-import {arrayToString, getDateFilm} from '../utils/common';
+import {getStringFromArray, getDateFilm} from '../utils/common';
 import AbstractView from './abstract.js';
-import {UpdateType} from '../const';
 
-const createFilmPopupTemplate = (data) => {
-  const filmInfo = data['film_info'];
-  const userDetails = data['user_details'];
+const ACTIVE_BUTTON = 'checked="checked"';
 
-  const {title, release, runtime, genre, poster, description, director, writers, actors} = filmInfo;
-  const {watchlist, favorite} = userDetails;
+const createFilmPopupTemplate = ({filmInfo, userDetails}) => {
+  const {title, release, runtime, genre, poster, description, director, writers, actors, alternativeTitle, totalRating, ageRating} = filmInfo;
+  const {watchlist, favorite, alreadyWatched} = userDetails;
 
-  const alternativeTitle = filmInfo['alternative_title'];
-  const totalRating = filmInfo['total_rating'];
-  const ageRating = filmInfo['age_rating'];
-  const alreadyWatched = userDetails['already_watched'];
-
-  const authors = arrayToString(writers);
-  const mummers = arrayToString(actors);
+  const authors = getStringFromArray(writers);
+  const mummers = getStringFromArray(actors);
 
   const releaseDate = getDateFilm(release.date);
-  const filmDur = `${parseInt(runtime/60)}h ${parseInt(runtime%60)}m`;
-
-  const activeButton = 'checked="checked"';
+  const filmDuration = `${parseInt(runtime / 60)}h ${parseInt(runtime % 60)}m`;
 
   return (
     `<div class="film-details__top-container">
@@ -65,11 +56,11 @@ const createFilmPopupTemplate = (data) => {
               </tr>
               <tr class="film-details__row">
                 <td class="film-details__term">Runtime</td>
-                <td class="film-details__cell">${filmDur}</td>
+                <td class="film-details__cell">${filmDuration}</td>
               </tr>
               <tr class="film-details__row">
                 <td class="film-details__term">Country</td>
-                <td class="film-details__cell">${release['release_country']}</td>
+                <td class="film-details__cell">${release.releaseCountry}</td>
               </tr>
               <tr class="film-details__row">
                 <td class="film-details__term">Genres</td>
@@ -84,13 +75,13 @@ const createFilmPopupTemplate = (data) => {
         </div>
 
         <section class="film-details__controls">
-          <input type="checkbox" ${watchlist && activeButton} class="film-details__control-input visually-hidden" id="watchlist" name="watchlist">
+          <input type="checkbox" ${watchlist && ACTIVE_BUTTON} class="film-details__control-input visually-hidden" id="watchlist" name="watchlist">
           <label for="watchlist" class="film-details__control-label film-details__control-label--watchlist">Add to watchlist</label>
 
-          <input type="checkbox" ${alreadyWatched && activeButton} class="film-details__control-input visually-hidden" id="watched" name="watched">
+          <input type="checkbox" ${alreadyWatched && ACTIVE_BUTTON} class="film-details__control-input visually-hidden" id="watched" name="watched">
           <label for="watched" class="film-details__control-label film-details__control-label--watched">Already watched</label>
 
-          <input type="checkbox" ${favorite && activeButton} class="film-details__control-input visually-hidden" id="favorite" name="favorite">
+          <input type="checkbox" ${favorite && ACTIVE_BUTTON} class="film-details__control-input visually-hidden" id="favorite" name="favorite">
           <label for="favorite" class="film-details__control-label film-details__control-label--favorite">Add to favorites</label>
         </section>
       </div>`
@@ -113,29 +104,9 @@ export default class FilmPopup extends AbstractView {
     return createFilmPopupTemplate(this._film);
   }
 
-  _favoriteClickHandler(evt) {
-    evt.preventDefault();
-    this._callback.favoriteClick(UpdateType.PATCH);
-  }
-
-  _clickHandler(evt) {
-    evt.preventDefault();
-    this._callback.click();
-  }
-
   setClickHandler(callback) {
     this._callback.click = callback;
     this.getElement().querySelector('.film-details__close-btn').addEventListener('click', this._clickHandler);
-  }
-
-  _watchlistClickHandler(evt) {
-    evt.preventDefault();
-    this._callback.watchlistClick(UpdateType.PATCH);
-  }
-
-  _watchedClickHandler(evt) {
-    evt.preventDefault();
-    this._callback.watchedClick(UpdateType.PATCH);
   }
 
   setFavoriteClickHandler(callback) {
@@ -151,6 +122,26 @@ export default class FilmPopup extends AbstractView {
   setWatchedClickHandler(callback) {
     this._callback.watchedClick = callback;
     this.getElement().querySelector('.film-details__control-label--watched').addEventListener('click', this._watchedClickHandler);
+  }
+
+  _clickHandler(evt) {
+    evt.preventDefault();
+    this._callback.click();
+  }
+
+  _favoriteClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.favoriteClick();
+  }
+
+  _watchlistClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.watchlistClick();
+  }
+
+  _watchedClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.watchedClick();
   }
 
 }

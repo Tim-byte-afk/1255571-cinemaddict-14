@@ -1,12 +1,5 @@
-import {SortTypes, MONTH_NAMES, FilterTypes} from '../const';
+import {SortTypes, MONTH_NAMES, FilterTypes, RanksDescription} from '../const';
 import dayjs from 'dayjs';
-
-const NOVICE_MIN = 10;
-
-const FAN_MIN = 11;
-const FAN_MAX = 20;
-
-const MOVIE_BUFF_MIN = 21;
 
 const getRandomInt = (min, max) => {
   min = Math.ceil(min);
@@ -14,29 +7,11 @@ const getRandomInt = (min, max) => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 };
 
-const shuffle = (someArray, count) => {
-  for (let i = someArray.length - 1; i > 0; i--) {
-    const randomPosition = Math.floor(Math.random() * i);
-    [someArray[i], someArray[randomPosition]] = [someArray[randomPosition], someArray[i]];
-  }
-
-  if (someArray.length < count) {
-    count = someArray.length;
-  }
-
-  const newArray = [];
-  for (let i = 0; i < count; i++) {
-    newArray.push(someArray[i]);
-  }
-
-  return newArray;
-};
-
 const getRandomDate = (start, end) => {
   return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
 };
 
-const arrayToString = (myArray) => {
+const getStringFromArray = (myArray) => {
   let someString = '';
   myArray.forEach((element, index) => {
     if(index < myArray.length) {
@@ -49,15 +24,15 @@ const arrayToString = (myArray) => {
   return someString;
 };
 
-const sortConditions = (activeSorting) => {
+const getSortConditions = (activeSorting) => {
   let sort;
 
   if (activeSorting === SortTypes.BY_DEFAULT) {
     sort = (a, b) => (b.id - a.id);
   } else if (activeSorting === SortTypes.BY_DATE) {
-    sort = (a, b) => (new Date(b.film_info.release.date) - new Date(a.film_info.release.date));
+    sort = (a, b) => (new Date(b.filmInfo.release.date) - new Date(a.filmInfo.release.date));
   } else if (activeSorting === SortTypes.BY_RAITING) {
-    sort = (a, b) => (b.film_info.total_rating - a.film_info.total_rating);
+    sort = (a, b) => (b.filmInfo.totalRating - a.filmInfo.totalRating);
   } else if (activeSorting === SortTypes.BY_COMMENTING) {
     sort = (a, b) => (b.comments.length - a.comments.length);
   }
@@ -65,15 +40,15 @@ const sortConditions = (activeSorting) => {
   return sort;
 };
 
-const filtering = (data, activeFilter) => {
+const getFilteredData = (data, activeFilter) => {
   if (activeFilter === FilterTypes.BY_DEFAULT) {
     return data;
   } else if (activeFilter === FilterTypes.WATCHLIST) {
-    return data.slice().filter((film) => film.user_details.watchlist === true);
+    return data.slice().filter((film) => film.userDetails.watchlist === true);
   } else if (activeFilter === FilterTypes.HISTORY) {
-    return data.slice().filter((film) => film.user_details.already_watched === true);
+    return data.slice().filter((film) => film.userDetails.alreadyWatched === true);
   } else if (activeFilter === FilterTypes.FAVORITES) {
-    return data.slice().filter((film) => film.user_details.favorite === true);
+    return data.slice().filter((film) => film.userDetails.favorite === true);
   }
 
   return data;
@@ -85,15 +60,15 @@ const getFilterCounts = (data) => {
   let countFavorites = 0;
 
   data.forEach((film) => {
-    if (film.user_details.watchlist === true) {
+    if (film.userDetails.watchlist === true) {
       countWatchlist++;
     }
 
-    if (film.user_details.already_watched === true) {
+    if (film.userDetails.alreadyWatched === true) {
       countHistory++;
     }
 
-    if (film.user_details.favorite === true) {
+    if (film.userDetails.favorite === true) {
       countFavorites++;
     }
   });
@@ -117,16 +92,16 @@ const getRank = (films) => {
   }
 
   films.forEach((film) => {
-    if (film.user_details.already_watched === true) {
+    if (film.userDetails.alreadyWatched === true) {
       count++;
     }
   });
 
-  if (count > 0 && count <= NOVICE_MIN) {
+  if (count > 0 && count <= RanksDescription.NOVICE_MIN) {
     return 'novice';
-  } else if (count >= FAN_MIN && count <=FAN_MAX) {
+  } else if (count >= RanksDescription.FAN_MIN && count <= RanksDescription.FAN_MAX) {
     return 'fan';
-  } else if (count >= MOVIE_BUFF_MIN) {
+  } else if (count >= RanksDescription.MOVIE_BUFF_MIN) {
     return 'movie buff';
   } else {
     return '';
@@ -141,7 +116,7 @@ const getRunTime = (films) => {
   }
 
   films.forEach((film) => {
-    runTime = runTime + film.film_info.runtime;
+    runTime = runTime + film.filmInfo.runtime;
   });
 
   return runTime;
@@ -160,24 +135,25 @@ const getWatchedCount = (films) => {
     return 0;
   }
 
-  return films.filter((film) => film.user_details.already_watched === true).length;
+  return films.filter((film) => film.userDetails.alreadyWatched === true).length;
 };
 
 const getAllGenres = (films) => {
 
   const genres = [];
   films.forEach((film) => {
-    genres.push(...film.film_info.genre);
+    genres.push(...film.filmInfo.genre);
   });
 
   return genres;
 };
 
 const getGenresCount = (films) => {
+  const allGenres = getAllGenres(films);
   const genresNumbers = [...new Set(getAllGenres(films))].map((genre) => {
     return {
       genreName: genre,
-      genreNumber: getAllGenres(films).filter((element) => element === genre).length,
+      genreNumber: allGenres.filter((element) => element === genre).length,
     };
   });
 
@@ -206,25 +182,24 @@ const getGenreNumber = (films) => {
 
 const getFilmsInDateRange = (films, dateFrom) => {
   return films.filter((film) => {
-    return dayjs(film.user_details.watching_date).isAfter(dateFrom, 'day') || dayjs(film.user_details.watching_date).isSame(dateFrom, 'day');
+    return dayjs(film.userDetails.watchingDate).isAfter(dateFrom, 'day') || dayjs(film.userDetails.watchingDate).isSame(dateFrom, 'day');
   });
 };
 
 const getSortedFilms = (data) => {
-  const watchedFilms = data.films.slice().filter((film) => film.user_details.already_watched === true);
+  const watchedFilms = data.films.slice().filter((film) => film.userDetails.alreadyWatched === true);
   const sortedFilms = data.dateFrom === null ? watchedFilms.slice() : getFilmsInDateRange(watchedFilms, data.dateFrom);
   return sortedFilms;
 };
 
 export {
-  shuffle,
   getRandomInt,
   getRandomDate,
-  arrayToString,
-  sortConditions,
+  getStringFromArray,
+  getSortConditions,
   getDateFilm,
   getDateComment,
-  filtering,
+  getFilteredData,
   getFilterCounts,
   getRank,
   getRunTimeHours,

@@ -4,9 +4,10 @@ import Smart from './smart';
 
 const SHAKE_ANIMATION_TIMEOUT = 600;
 const SNAKE_CLASS = `shake ${SHAKE_ANIMATION_TIMEOUT / 1000}s`;
+const EMOJIS_LIST = ['smile', 'sleeping', 'puke', 'angry'];
+const CODE_ENTER_KEY = 13;
 
 const createCommentList = ({comments, isDeleting, isSaving, newEmojiText, deletingCommentId, currentEmoji}) => {
-  const EMOJIS_LIST = ['smile', 'sleeping', 'puke', 'angry'];
 
   return (
     `<div class="film-details__bottom-container">
@@ -65,12 +66,99 @@ export default class FilmComments extends Smart {
 
     this._formSubmitHandler = this._formSubmitHandler.bind(this);
 
-    this._commentDelateHandler = this._commentDelateHandler.bind(this);
+    this._commentDeleteHandler = this._commentDeleteHandler.bind(this);
     this._setInnerHandlers();
   }
 
   getTemplate() {
     return createCommentList(this._data);
+  }
+
+  restoreHandlers() {
+    this._setInnerHandlers();
+  }
+
+  setFormSubmitHandler(callback) {
+    this._callback.formSubmit = callback;
+    document.addEventListener('keydown', this._formSubmitHandler);
+  }
+
+  removeFormSubmitHandler() {
+    document.removeEventListener('keydown', this._formSubmitHandler);
+  }
+
+  removeCommentDeleteHandler() {
+    document.removeEventListener('keydown', this._commentDeleteHandler);
+  }
+
+  setCommentDelateHandler(callback) {
+    this._callback.commentDelate = callback;
+    const delateButtons = this.getElement().querySelectorAll('.film-details__comment-delete');
+    delateButtons.forEach((element) => {
+      element.addEventListener('click', this._commentDeleteHandler);
+    });
+  }
+
+  shakeForm(callback = null) {
+    this.getElement().querySelector('.film-details__new-comment').style.animation = SNAKE_CLASS;
+    setTimeout(() => {
+      this.getElement().querySelector('.film-details__new-comment').style.animation = '';
+      if (callback !== null) {
+        callback();
+      }
+    }, SHAKE_ANIMATION_TIMEOUT);
+  }
+
+  shakeComment(callback, deletingCommentId) {
+    const deletingElement = Array.from(this.getElement().querySelectorAll('.film-details__comment')).find((element) => {
+      return element.querySelector('.film-details__comment-delete').dataset.commentIndex === deletingCommentId;
+    });
+
+    deletingElement.style.animation = SNAKE_CLASS;
+    setTimeout(() => {
+      deletingElement.style.animation = '';
+      callback();
+    }, SHAKE_ANIMATION_TIMEOUT);
+  }
+
+  _setInnerHandlers() {
+    this.getElement().querySelectorAll('.film-details__emoji-item')
+      .forEach((element) => {
+        element.addEventListener('change', this._addNewEmojiHandler);
+      });
+    this.getElement().querySelector('.film-details__comment-input').addEventListener('input', this._commentInputHandler);
+  }
+
+  _formSubmitHandler(evt) {
+    if ((evt.ctrlKey && evt.keyCode === CODE_ENTER_KEY) || (evt.metaKey && evt.keyCode === CODE_ENTER_KEY)) {
+      evt.preventDefault();
+      if (this._data.currentEmoji === null || this._data.newEmojiText === '' || this._data.newEmojiText.trim() === '') {
+        this.shakeForm();
+        return;
+      }
+
+      this._data.newEmojiText.trim();
+      this._callback.formSubmit(FilmComments.parseDataToNewComment(this._data));
+    }
+  }
+
+  _commentDeleteHandler(evt) {
+    evt.preventDefault();
+    this._callback.commentDelate(evt.target.dataset.commentIndex);
+  }
+
+  _addNewEmojiHandler(evt) {
+    evt.preventDefault();
+    this.updateData({
+      currentEmoji: evt.target.value,
+    });
+  }
+
+  _commentInputHandler(evt) {
+    evt.preventDefault();
+    this.updateData({
+      newEmojiText: evt.target.value,
+    }, true);
   }
 
   static parseCommentToData(comments) {
@@ -94,84 +182,5 @@ export default class FilmComments extends Smart {
       commentText: data.newEmojiText,
       emotion: data.currentEmoji,
     };
-  }
-
-  restoreHandlers() {
-    this._setInnerHandlers();
-  }
-
-  setFormSubmitHandler(callback) {
-    this._callback.formSubmit = callback;
-    document.addEventListener('keydown', this._formSubmitHandler);
-  }
-
-  removeFormSubmitHandler() {
-    document.removeEventListener('keydown', this._formSubmitHandler);
-  }
-
-  setCommentDelateHandler(callback) {
-    this._callback.commentDelate = callback;
-    const delateButtons = this.getElement().querySelectorAll('.film-details__comment-delete');
-    delateButtons.forEach((element) => {
-      element.addEventListener('click', this._commentDelateHandler);
-    });
-  }
-
-  shakeForm() {
-    this.getElement().querySelector('.film-details__new-comment').style.animation = SNAKE_CLASS;
-    setTimeout(() => {
-      this.getElement().querySelector('.film-details__new-comment').style.animation = '';
-    }, SHAKE_ANIMATION_TIMEOUT);
-  }
-
-  shakeComment(deletingCommentId) {
-    const deletingElement = Array.from(this.getElement().querySelectorAll('.film-details__comment')).find((element) => {
-      return element.querySelector('.film-details__comment-delete').dataset.commentIndex === deletingCommentId;
-    });
-    deletingElement.style.animation = SNAKE_CLASS;
-    setTimeout(() => {
-      deletingElement.style.animation = '';
-    }, SHAKE_ANIMATION_TIMEOUT);
-  }
-
-  _setInnerHandlers() {
-    this.getElement().querySelectorAll('.film-details__emoji-item')
-      .forEach((element) => {
-        element.addEventListener('change', this._addNewEmojiHandler);
-      });
-    this.getElement().querySelector('.film-details__comment-input').addEventListener('input', this._commentInputHandler);
-  }
-
-  _addNewEmojiHandler(evt) {
-    evt.preventDefault();
-    this.updateData({
-      currentEmoji: evt.target.value,
-    });
-  }
-
-  _commentInputHandler(evt) {
-    evt.preventDefault();
-    this.updateData({
-      newEmojiText: evt.target.value,
-    }, true);
-  }
-
-  _formSubmitHandler(evt) {
-    if ((evt.ctrlKey && evt.keyCode === 13) || (evt.metaKey && evt.keyCode === 13)) {
-      evt.preventDefault();
-      if (this._data.currentEmoji === null || this._data.newEmojiText === '' || this._data.newEmojiText.trim() === '') {
-        this.shakeForm();
-
-        return;
-      }
-
-      this._data.newEmojiText.trim();
-      this._callback.formSubmit(FilmComments.parseDataToNewComment(this._data));
-    }
-  }
-
-  _commentDelateHandler(evt) {
-    evt.preventDefault();
-    this._callback.commentDelate(evt.target.dataset.commentIndex);
   }
 }

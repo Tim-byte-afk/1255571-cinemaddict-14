@@ -6,7 +6,7 @@ import {render, replace, remove} from '../utils/render';
 import {Places, UserAction, UpdateType} from '../const';
 
 export default class Film {
-  constructor(bodySite, filmListContainer, changeData, api) {
+  constructor(bodySite, filmListContainer, changeData, api, addPopup, removeFilmPopup) {
     this._siteBodyElement = bodySite;
     this._filmListContainer = filmListContainer;
     this._changeData = changeData;
@@ -28,6 +28,9 @@ export default class Film {
 
     this._addCommentHandler = this._addCommentHandler.bind(this);
     this._deleteCommentHandler = this._deleteCommentHandler.bind(this);
+
+    this._addPopup = addPopup;
+    this._removeFilmPopup = removeFilmPopup;
   }
 
   init(film, container) {
@@ -75,9 +78,6 @@ export default class Film {
 
   destroy() {
     remove(this._filmComponent);
-    remove(this._filmFormPopupComponent);
-    remove(this._filmPopupComponent);
-    remove(this._filmPopupCommentsComponent);
   }
 
   _renderComments() {
@@ -100,14 +100,18 @@ export default class Film {
         replace(this._filmPopupCommentsComponent, prevFilmPopupCommentsComponent);
       }
 
-      if (prevFilmPopupCommentsComponent !== null) {
-        render(filmDetailsElement, this._filmPopupCommentsComponent, Places.BEFOREEND);
-
-        return;
-      }
+      render(filmDetailsElement, this._filmPopupCommentsComponent, Places.BEFOREEND);
+      prevFilmPopupCommentsComponent.removeFormSubmitHandler();
+      prevFilmPopupCommentsComponent.removeCommentDeleteHandler();
 
       remove(prevFilmPopupCommentsComponent);
 
+    });
+  }
+
+  _removeAllPopups() {
+    this._siteBodyElement.querySelectorAll('.film-details').forEach((element) => {
+      element.remove();
     });
   }
 
@@ -115,6 +119,8 @@ export default class Film {
     this._filmFormPopupComponent.setPopupClose(this._siteBodyElement);
     this._filmFormPopupComponent.getElement().remove();
     this._filmPopupCommentsComponent.getElement().remove();
+    this._filmPopupCommentsComponent.removeFormSubmitHandler();
+    this._removeFilmPopup();
     this._isPopupOpen = false;
   }
 
@@ -125,12 +131,45 @@ export default class Film {
 
   _openPopup() {
     this._isPopupOpen = true;
+    this._removeAllPopups();
+    this._addPopup(this._film.id);
     render(this._filmListContainer, this._filmFormPopupComponent, Places.BEFOREEND);
     render(this._filmFormPopupComponent.getElement().querySelector('.film-details__inner'), this._filmPopupComponent, Places.BEFOREEND);
     this._renderComments();
     this._filmFormPopupComponent.setPopupOpen(this._siteBodyElement);
 
     this._filmPopupComponent.setClickHandler(this._closePopup);
+  }
+
+  setSaving() {
+    this._filmPopupCommentsComponent.removeFormSubmitHandler();
+    this._filmPopupCommentsComponent.updateData({
+      isSaving: true,
+    });
+  }
+
+  setDeleting(commentId) {
+    this._filmPopupCommentsComponent.removeCommentDeleteHandler();
+    this._filmPopupCommentsComponent.updateData({
+      isDeleting: true,
+      deletingCommentId: commentId,
+    });
+  }
+
+  resetFormState() {
+    this._filmPopupCommentsComponent.shakeForm(() => {
+      this._filmPopupCommentsComponent.updateData({
+        isSaving: false,
+      });
+    });
+  }
+
+  resetDeleteState(commentId) {
+    this._filmPopupCommentsComponent.shakeComment(() => {
+      this._filmPopupCommentsComponent.updateData({
+        isDeleting: false,
+      });
+    }, commentId);
   }
 
   _onEscKeyDown(evt) {
@@ -141,39 +180,39 @@ export default class Film {
     }
   }
 
-  _handleFavoriteClick(typeForUpdate = UpdateType.MINOR) {
+  _handleFavoriteClick() {
     this._changeData(
       UserAction.UPDATE_FILM,
-      typeForUpdate,
+      UpdateType.MINOR,
       Object.assign(
         {},
         this._film,
-        this._film.user_details.favorite = !this._film.user_details.favorite,
+        this._film.userDetails.favorite = !this._film.userDetails.favorite,
       ),
     );
   }
 
-  _handleWatchlistClick(typeForUpdate = UpdateType.MINOR) {
+  _handleWatchlistClick() {
     this._changeData(
       UserAction.UPDATE_FILM,
-      typeForUpdate,
+      UpdateType.MINOR,
       Object.assign(
         {},
         this._film,
-        this._film.user_details.watchlist = !this._film.user_details.watchlist,
+        this._film.userDetails.watchlist = !this._film.userDetails.watchlist,
       ),
     );
   }
 
-  _handleWatchedClick(typeForUpdate = UpdateType.MINOR) {
+  _handleWatchedClick() {
     this._changeData(
       UserAction.UPDATE_FILM,
-      typeForUpdate,
+      UpdateType.MINOR,
       Object.assign(
         {},
         this._film,
-        this._film.user_details['already_watched'] = !this._film.user_details['already_watched'],
-        this._film.user_details['watching_date'] = new Date().toISOString(),
+        this._film.userDetails.alreadyWatched = !this._film.userDetails.alreadyWatched,
+        this._film.userDetails.watchingDate = new Date().toISOString(),
       ),
     );
   }
@@ -181,7 +220,7 @@ export default class Film {
   _addCommentHandler(newComment) {
     this._changeData(
       UserAction.ADD_COMMENT,
-      UpdateType.PATCH,
+      UpdateType.MINOR,
       Object.assign(
         {},
         {
@@ -198,7 +237,7 @@ export default class Film {
   _deleteCommentHandler(commentId) {
     this._changeData(
       UserAction.DELETE_COMMENT,
-      UpdateType.PATCH,
+      UpdateType.MINOR,
       Object.assign(
         {},
         {

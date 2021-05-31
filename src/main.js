@@ -15,11 +15,34 @@ import StatisticsView from './view/statistics.js';
 const AUTHORIZATION = 'Basic Hsk3svvnt84';
 const END_POINT = 'https://14.ecmascript.pages.academy/cinemaddict/';
 
-const api = new Api(END_POINT, AUTHORIZATION);
-
 const siteBodyElement = document.querySelector('body');
 const siteHeaderElement = siteBodyElement.querySelector('.header');
 const siteMainElement = siteBodyElement.querySelector('.main');
+const siteFooterStatisticsElement = siteBodyElement.querySelector('.footer__statistics');
+
+const handleSiteMenuClick = (menuItem) => {
+  switch (menuItem) {
+    case MenuItem.FILTER:
+      if (statisticComponent !== null) {
+        statisticComponent.destroy();
+      }
+      presenter.show();
+      break;
+    case MenuItem.STATISTICS:
+      statisticComponent = new StatisticsView(filmsModel.get());
+      render(siteMainElement, statisticComponent, Places.BEFOREEND);
+      presenter.hide();
+      break;
+  }
+};
+
+const setFilms = (films) => {
+  filmsModel.set(UpdateType.INIT, films);
+  render(siteFooterStatisticsElement, new FooterStatisticsView(films.length), Places.BEFOREEND);
+  filterPresenter.setMenuClickHandler(handleSiteMenuClick);
+};
+
+const api = new Api(END_POINT, AUTHORIZATION);
 
 const filmsModel = new FilmsModel();
 
@@ -33,35 +56,12 @@ let statisticComponent = null;
 filterPresenter.init();
 presenter.init();
 
-const handleSiteMenuClick = (menuItem) => {
-  switch (menuItem) {
-    case MenuItem.FILTER:
-      if (statisticComponent !== null) {
-        statisticComponent.hide();
-      }
-      presenter.show();
-      break;
-    case MenuItem.STATISTICS:
-      statisticComponent = new StatisticsView(filmsModel.get());
-      render(siteMainElement, statisticComponent, Places.BEFOREEND);
-      presenter.hide();
-      statisticComponent.show();
-      break;
-  }
-};
-
-const siteFooterStatisticsElement = siteBodyElement.querySelector('.footer__statistics');
-
 api.getFilms()
   .then((films) => {
-    filmsModel.set(UpdateType.INIT, films);
-    render(siteFooterStatisticsElement, new FooterStatisticsView(films.length), Places.BEFOREEND);
-    filterPresenter.setMenuClickHandler(handleSiteMenuClick);
+    setFilms(films);
   })
   .catch(() => {
-    filmsModel.set(UpdateType.INIT, []);
-    render(siteFooterStatisticsElement, new FooterStatisticsView([].length), Places.BEFOREEND);
-    filterPresenter.setMenuClickHandler(handleSiteMenuClick);
+    setFilms([]);
   });
 
 

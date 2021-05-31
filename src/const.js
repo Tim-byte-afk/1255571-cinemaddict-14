@@ -59,6 +59,14 @@ export const MenuItem = {
   STATISTICS: 'STATISTICS',
 };
 
+export const RanksDescription = {
+  NOVICE_MIN: 10,
+  FAN_MIN: 11,
+  FAN_MAX: 20,
+  MOVIE_BUFF_MIN: 20,
+};
+
+
 export const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December',
 ];

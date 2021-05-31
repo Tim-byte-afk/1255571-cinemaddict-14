@@ -1,22 +1,16 @@
 import {Variable} from '../const';
 import AbstractView from './abstract.js';
 
-const createFilmCardTemplate = (data) => {
+const ACTIVE_BUTTON = 'film-card__controls-item--active';
 
-  const userDetails = data['user_details'];
-  const filmInfo = data['film_info'];
-
-  const {id, title, release, runtime, genre, poster, description} = filmInfo;
-  const {watchlist, favorite} = userDetails;
-
-  const alreadyWatched = userDetails['already_watched'];
-  const totalRating = filmInfo['total_rating'];
+const createFilmCardTemplate = ({id, userDetails, filmInfo, comments}) => {
+  const {title, release, runtime, genre, poster, description, totalRating} = filmInfo;
+  const {watchlist, alreadyWatched, favorite} = userDetails;
 
   const genreList = genre[0];
-  const shortDesc = description.length > Variable.MAX_COUNT_CHARACTER ? description.slice(0, Variable.MAX_COUNT_CHARACTER) + '...' : description ;
+  const shortDescription = description.length > Variable.MAX_COUNT_CHARACTER ? description.slice(0, Variable.MAX_COUNT_CHARACTER) + '...' : description ;
   const date = new Date(release.date).getFullYear();
-  const filmDur = `${parseInt(runtime/60)}h ${parseInt(runtime%60)}m`;
-  const activeButton = 'film-card__controls-item--active';
+  const filmDuration = `${Math.floor(runtime/60)}h ${Math.floor(runtime%60)}m`;
 
   return (
     `<article id='${id}_${date}' class="film-card">
@@ -24,16 +18,16 @@ const createFilmCardTemplate = (data) => {
       <p class="film-card__rating">${totalRating}</p>
       <p class="film-card__info">
         <span class="film-card__year">${date}</span>
-        <span class="film-card__duration">${filmDur}</span>
+        <span class="film-card__duration">${filmDuration}</span>
         <span class="film-card__genre">${genreList}</span>
       </p>
       <img src="${poster}" alt="" class="film-card__poster">
-      <p class="film-card__description">${shortDesc}</p>
-      <a class="film-card__comments">${data['comments'].length} comments</a>
+      <p class="film-card__description">${shortDescription}</p>
+      <a class="film-card__comments">${comments.length} comments</a>
       <div class="film-card__controls">
-        <button class="film-card__controls-item button film-card__controls-item--add-to-watchlist ${watchlist && activeButton}" type="button">Add to watchlist</button>
-        <button class="film-card__controls-item button film-card__controls-item--mark-as-watched ${alreadyWatched && activeButton}" type="button">Mark as watched</button>
-        <button class="film-card__controls-item button film-card__controls-item--favorite ${favorite && activeButton}" type="button">Mark as favorite</button>
+        <button class="film-card__controls-item button film-card__controls-item--add-to-watchlist ${watchlist && ACTIVE_BUTTON}" type="button">Add to watchlist</button>
+        <button class="film-card__controls-item button film-card__controls-item--mark-as-watched ${alreadyWatched && ACTIVE_BUTTON}" type="button">Mark as watched</button>
+        <button class="film-card__controls-item button film-card__controls-item--favorite ${favorite && ACTIVE_BUTTON}" type="button">Mark as favorite</button>
       </div>
     </article>`
   );
@@ -56,11 +50,6 @@ export default class FilmCard extends AbstractView {
     return createFilmCardTemplate(this._film);
   }
 
-  _clickHandler(evt) {
-    evt.preventDefault();
-    this._callback.click();
-  }
-
   setClickHandler(callback) {
     this._callback.click = callback;
     this.getElement()
@@ -68,21 +57,6 @@ export default class FilmCard extends AbstractView {
       .forEach((element) => {
         element.addEventListener('click', this._clickHandler);
       });
-  }
-
-  _favoriteClickHandler(evt) {
-    evt.preventDefault();
-    this._callback.favoriteClick();
-  }
-
-  _watchlistClickHandler(evt) {
-    evt.preventDefault();
-    this._callback.watchlistClick();
-  }
-
-  _watchedClickHandler(evt) {
-    evt.preventDefault();
-    this._callback.watchedClick();
   }
 
   setFavoriteClickHandler(callback) {
@@ -98,5 +72,25 @@ export default class FilmCard extends AbstractView {
   setWatchedClickHandler(callback) {
     this._callback.watchedClick = callback;
     this.getElement().querySelector('.film-card__controls-item--mark-as-watched').addEventListener('click', this._watchedClickHandler);
+  }
+
+  _clickHandler(evt) {
+    evt.preventDefault();
+    this._callback.click();
+  }
+
+  _favoriteClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.favoriteClick();
+  }
+
+  _watchlistClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.watchlistClick();
+  }
+
+  _watchedClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.watchedClick();
   }
 }
