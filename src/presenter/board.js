@@ -163,7 +163,7 @@ export default class Board {
         this._filmPresenter[data.id].init(data, this._upcomingFilmsComponent);
         break;
       case UpdateType.MINOR:
-        this._clearBoard({resetRenderedFilmCount: true});
+        this._clearBoard();
         this._renderBoard();
         break;
       case UpdateType.MAJOR:
@@ -179,6 +179,9 @@ export default class Board {
   }
 
   _handleAddFilmPopup(filmId) {
+    if (this._filmPresenterPopup !== null) {
+      this._filmPresenterPopup.removeAllPopups();
+    }
     this._filmPresenterPopup = this._filmPresenter[filmId];
     this._filmPresenterPopupId = filmId;
   }
@@ -272,7 +275,7 @@ export default class Board {
     remove(this._loadingComponent);
     remove(this._logoComponent);
 
-    this._renderedFilmsCount = resetRenderedFilmCount ? this._renderedFilmsCount = Variable.FILM_COUNT : this._renderedFilmsCount = Math.min(filmCount, this._renderedFilmsCount);
+    this._renderedFilmsCount = resetRenderedFilmCount ? Variable.FILM_COUNT : Math.min(filmCount, this._renderedFilmsCount);
 
     if (resetSortType) {
       this._currentSortType = SortTypes.BY_DEFAULT;

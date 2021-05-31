@@ -80,6 +80,16 @@ export default class Film {
     remove(this._filmComponent);
   }
 
+  removeAllPopups() {
+    if (this._filmPopupCommentsComponent !== null) {
+      this._filmPopupCommentsComponent.removeFormSubmitHandler();
+    }
+    document.removeEventListener('keydown', this._onEscKeyDown);
+    this._siteBodyElement.querySelectorAll('.film-details').forEach((element) => {
+      element.remove();
+    });
+  }
+
   _renderComments() {
     this._api.getComments(this._film.id).then((response) => {
       const prevFilmPopupCommentsComponent = this._filmPopupCommentsComponent;
@@ -109,12 +119,6 @@ export default class Film {
     });
   }
 
-  _removeAllPopups() {
-    this._siteBodyElement.querySelectorAll('.film-details').forEach((element) => {
-      element.remove();
-    });
-  }
-
   _removePopup() {
     this._filmFormPopupComponent.setPopupClose(this._siteBodyElement);
     this._filmFormPopupComponent.getElement().remove();
@@ -131,7 +135,7 @@ export default class Film {
 
   _openPopup() {
     this._isPopupOpen = true;
-    this._removeAllPopups();
+    this.removeAllPopups();
     this._addPopup(this._film.id);
     render(this._filmListContainer, this._filmFormPopupComponent, Places.BEFOREEND);
     render(this._filmFormPopupComponent.getElement().querySelector('.film-details__inner'), this._filmPopupComponent, Places.BEFOREEND);
@@ -142,14 +146,12 @@ export default class Film {
   }
 
   setSaving() {
-    this._filmPopupCommentsComponent.removeFormSubmitHandler();
     this._filmPopupCommentsComponent.updateData({
       isSaving: true,
     });
   }
 
   setDeleting(commentId) {
-    this._filmPopupCommentsComponent.removeCommentDeleteHandler();
     this._filmPopupCommentsComponent.updateData({
       isDeleting: true,
       deletingCommentId: commentId,

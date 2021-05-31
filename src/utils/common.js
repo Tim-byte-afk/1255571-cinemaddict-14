@@ -11,17 +11,17 @@ const getRandomDate = (start, end) => {
   return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
 };
 
-const getStringFromArray = (myArray) => {
-  let someString = '';
-  myArray.forEach((element, index) => {
-    if(index < myArray.length) {
-      someString = someString + element + ', ';
+const getStringFromArray = (data) => {
+  let result = '';
+  data.forEach((element, index) => {
+    if(index < data.length) {
+      result = result + element + ', ';
     } else {
-      someString = someString + element;
+      result = result + element;
     }
   });
 
-  return someString;
+  return result;
 };
 
 const getSortConditions = (activeSorting) => {
@@ -138,30 +138,25 @@ const getWatchedCount = (films) => {
   return films.filter((film) => film.userDetails.alreadyWatched === true).length;
 };
 
-const getAllGenres = (films) => {
-
-  const genres = [];
-  films.forEach((film) => {
-    genres.push(...film.filmInfo.genre);
-  });
-
-  return genres;
-};
-
 const getGenresCount = (films) => {
-  const allGenres = getAllGenres(films);
-  const genresNumbers = [...new Set(getAllGenres(films))].map((genre) => {
-    return {
-      genreName: genre,
-      genreNumber: allGenres.filter((element) => element === genre).length,
-    };
-  });
+  const res = films.reduce((acc, film) => {
+    film.filmInfo.genre.forEach((genreName) => {
+      const genre = acc.get(genreName);
 
-  genresNumbers.sort((a, b) => {
-    return b.genreNumber - a.genreNumber;
-  });
+      if (genre) {
+        genre.genreNumber++;
+      } else {
+        acc.set(genreName, { genreName: genreName, genreNumber: 1});
+      }
+    });
 
-  return genresNumbers;
+    return acc;
+  }, new Map());
+  const result = Array.from(res.values());
+
+  result.sort((a, b) => b.genreNumber - a.genreNumber);
+
+  return result;
 };
 
 
